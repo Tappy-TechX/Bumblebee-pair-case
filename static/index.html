@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="WhatsApp Bot Pairing Code Generator" />
+    <meta name="keywords" content="pair, whatsapp-bot, pairing code" />
+    <meta name="author" content="Black-Tappy" />
+    <link rel="icon" href="https://files.catbox.moe/8k0enh.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PAIR CODE</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden; /* Prevents scrollbars from the video */
+        }
+
+        /* Background Video Styling */
+        #video-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            transform: translateX(-50%) translateY(-50%);
+            background-size: cover;
+            filter: brightness(0.7); /* Darken the video slightly */
+        }
+
+        /* Frosted Glass Card */
+        .card {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            padding: 30px 40px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        /* Input Field Styling */
+        #phone {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #phone::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #phone:focus {
+            border-color: #00aaff;
+        }
+
+        /* Button Styling */
+        .submit-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #00aaff, #0077cc);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            font-size: 1.1em;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+        }
+
+        /* Output Area Styling */
+        #output {
+            margin-top: 20px;
+            font-size: 1.1em;
+            word-wrap: break-word;
+        }
+
+        #output p {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .copy-btn {
+            padding: 8px 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0088dd;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: #0066aa;
+        }
+
+        .copy-confirm {
+            color: #4caf50;
+            font-weight: bold;
+            margin-top: 5px;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+<audio id="myAudio" loop muted>
+  <source src="https://files.catbox.moe/jrfk1n.mp3" type="audio/mp3">
+</audio>
+    <!-- Background Video -->
+    <video autoplay muted loop playsinline id="video-bg">
+        <source src="https://files.catbox.moe/7qzr71.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="card">
+        <h2>Get Pairing Code</h2>
+        <input type="text" id="phone" placeholder="Enter phone number (e.g., 1234567890)" />
+        <a class="submit-btn" onclick="submitForm()">Submit</a>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        // Removes all non-digit characters from the input
+        function sanitizeInput(input) {
+            return input.replace(/\D/g, "");
+        }
+
+        async function submitForm() {
+            const phoneInput = document.getElementById("phone");
+            const submitBtn = document.querySelector(".submit-btn");
+            const outputDiv = document.getElementById("output");
+            const sanitizedNumber = sanitizeInput(phoneInput.value);
+
+            if (!sanitizedNumber) {
+                outputDiv.innerHTML = `<p style="color: #ffcdd2;">Please enter a valid phone number.</p>`;
+                return;
+            }
+
+            // Show loading state
+            submitBtn.innerHTML = 'Loading...';
+            submitBtn.style.pointerEvents = 'none';
+            outputDiv.innerHTML = '';
+
+            try {
+                // Corrected API endpoint: /pair?phone=...
+                const response = await fetch(`/pair?phone=${sanitizedNumber}`);
+                const data = await response.json();
+
+                if (response.ok && data.code) {
+                    outputDiv.innerHTML = `
+                        <p>Your Code: <strong>${data.code}</strong></p>
+                        <button class="copy-btn" onclick="copyToClipboard('${data.code}')">Copy Code</button>
+                        <p id="copy-confirm" class="copy-confirm" style="display: none;">Copied!</p>
+                    `;
+                } else {
+                    outputDiv.innerHTML = `<p style="color: #ffcdd2;">Error: ${data.error || 'Failed to get code. Please try again.'}</p>`;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `<p style="color: #ffcdd2;">Error: Could not connect to the server.</p>`;
+            } finally {
+                // Restore button state
+                submitBtn.innerHTML = 'Submit';
+                submitBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const confirmMsg = document.getElementById("copy-confirm");
+                if (confirmMsg) {
+                    confirmMsg.style.display = "block";
+                    // Hide the confirmation message after 2 seconds
+                    setTimeout(() => {
+                        confirmMsg.style.display = "none";
+                    }, 2000);
+                }
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
+        
+document.addEventListener('click', function () {
+    const audio = document.getElementById('myAudio');
+    audio.muted = false;
+    audio.play();
+  }, { once: true });     
+    </script>
+</body>
+</html>
